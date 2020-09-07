@@ -6,7 +6,27 @@ ModelImporter:
   - first:
       74: -203655887218126122
     second: mixamo.com
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: survivor_MAT
+    second: {fileID: 2100000, guid: dd877a2b9316a8b49a5c4f63aacaf358, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Survivor_diffuse
+    second: {fileID: 2800000, guid: 5366445bdb7439643a5b90e765c1e5f2, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Survivor_normal
+    second: {fileID: 2800000, guid: 2bfc7a8ca1367544fa4b2415453a8ef5, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Survivor_specular
+    second: {fileID: 2800000, guid: e138c3213d42c684a8064d26a5c2fba6, type: 3}
   materials:
     materialImportMode: 1
     materialName: 0

@@ -6,7 +6,42 @@ ModelImporter:
   - first:
       74: -203655887218126122
     second: mixamo.com
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mort_Body_MAT
+    second: {fileID: 2100000, guid: 418c669d316bcb94cb54e01daf5f0d73, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mort_EyeSpec_MAT
+    second: {fileID: 2100000, guid: 8e0b0c511446e6142a588cd83c6a4a5f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mort_Eyes_MAT
+    second: {fileID: 2100000, guid: 22eeda014cb774648ad8d94f7131c305, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Mort_Guard_MAT
+    second: {fileID: 2100000, guid: 987301d1203d62047a493453de4ede3c, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Mortimer_diffuse
+    second: {fileID: 2800000, guid: 2e3218dcc128e754f9c48f2025c83306, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Mortimer_normal
+    second: {fileID: 2800000, guid: f279c7b6ab40b434595dcbfdf2f1c7cc, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Mortimer_specular
+    second: {fileID: 2800000, guid: dc9ae3dce177f9049abd3c0e1d648701, type: 3}
   materials:
     materialImportMode: 1
     materialName: 0

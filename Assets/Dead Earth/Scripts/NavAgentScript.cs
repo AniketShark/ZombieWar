@@ -18,6 +18,8 @@ public class NavAgentScript : MonoBehaviour
 	[SerializeField]
 	private float jumpHeight;
 
+
+
 	private void Start()
 	{
 		_navmeshAgent = GetComponent<NavMeshAgent>();
@@ -43,7 +45,7 @@ public class NavAgentScript : MonoBehaviour
 	public void Update()
 	{
 		pathPending = _navmeshAgent.pathPending;
-		pathStale = _navmeshAgent.isPathStale;
+		pathStale  = _navmeshAgent.isPathStale;
 		pathStatus = _navmeshAgent.pathStatus;
 
 		if (_navmeshAgent.isOnOffMeshLink)
@@ -52,15 +54,13 @@ public class NavAgentScript : MonoBehaviour
 			return;
 		}
 
-		if ((_navmeshAgent.remainingDistance.Equals(_navmeshAgent.stoppingDistance) && !pathPending) || (pathStatus == NavMeshPathStatus.PathInvalid))// || pathStatus == NavMeshPathStatus.PathPartial))
+		if ((_navmeshAgent.remainingDistance.Equals(_navmeshAgent.stoppingDistance) && !pathPending) || 
+		(pathStatus == NavMeshPathStatus.PathInvalid))
 		{
 			SetDestination(true);
 		}
 		else if (pathStale)
 			SetDestination(false);
-
-		
-
 	}
 
 	IEnumerator Jump(float duration)

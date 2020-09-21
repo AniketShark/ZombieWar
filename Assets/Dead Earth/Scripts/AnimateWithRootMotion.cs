@@ -8,6 +8,7 @@ public class AnimateWithRootMotion : MonoBehaviour
 	public Animator _animator;
 	public AIWaypointNetwork network;
 	public int currentIndex;
+	public bool mixedMode;
 	private NavMeshAgent _navmeshAgent;
 	private bool hasPath;
 	private bool pathPending;
@@ -26,9 +27,7 @@ public class AnimateWithRootMotion : MonoBehaviour
 		Debug.Assert(network != null, "No waypoint network provided");
 		_navmeshAgent.destination = network.Waypoints[currentIndex].position;
 		//_navmeshAgent.updatePosition = false;
-		_navmeshAgent.updateRotation = false;
-
-
+		//_navmeshAgent.updateRotation = false;
 	}
 	
 	public void SetDestination(bool increament)
@@ -48,7 +47,8 @@ public class AnimateWithRootMotion : MonoBehaviour
 
 	private void OnAnimatorMove()
 	{
-		transform.rotation = _animator.rootRotation;
+		if(mixedMode && !_animator.GetCurrentAnimatorStateInfo(0).IsName("BaseLayer.Locomotion"))
+			transform.rotation = _animator.rootRotation;
 		_navmeshAgent.velocity = _animator.deltaPosition / Time.deltaTime;
 	}
 
@@ -65,7 +65,16 @@ public class AnimateWithRootMotion : MonoBehaviour
 		_smoothAngle = Mathf.MoveTowardsAngle(_smoothAngle, angle, 80f * Time.deltaTime);
 
 		_animator.SetFloat(_speedHash, speed, 0.1f, Time.deltaTime);
-		_animator.SetFloat(_angleHash, angle, 1.0f, Time.deltaTime);
+		_animator.SetFloat(_angleHash, _smoothAngle, 1.0f, Time.deltaTime);
+
+		if (_navmeshAgent.desiredVelocity.sqrMagnitude > Mathf.Epsilon)
+		{
+			if (!mixedMode || (mixedMode && Mathf.Abs(angle) < 80f && _animator.GetCurrentAnimatorStateInfo(0).IsName("BaseLayer.Locomotion")))
+			{
+				Quaternion lookRotation = Quaternion.LookRotation(_navmeshAgent.desiredVelocity, Vector3.up);
+				transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, 5.0f * Time.deltaTime);
+			}
+		}
 
 		if ((_navmeshAgent.remainingDistance < _navmeshAgent.stoppingDistance && !pathPending) || (pathStatus == NavMeshPathStatus.PathInvalid))
 		{

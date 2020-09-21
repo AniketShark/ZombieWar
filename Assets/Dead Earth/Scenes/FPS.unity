@@ -1237,6 +1237,7 @@ MonoBehaviour:
   _animator: {fileID: 1880894261}
   network: {fileID: 5078052}
   currentIndex: 0
+  mixedMode: 1
 --- !u!195 &1880894263
 NavMeshAgent:
   m_ObjectHideFlags: 0

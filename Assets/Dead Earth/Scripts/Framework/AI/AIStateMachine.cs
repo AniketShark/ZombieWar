@@ -85,9 +85,7 @@ public abstract class AIStateMachine : MonoBehaviour
 	protected Transform _transform = null;
 
 	public Animator animator {get{return _animator;}}
-
 	public NavMeshAgent navAgent { get{return _navAgent;} }
-
 	public Vector3 sensorPostion
 	{
 		get
@@ -102,7 +100,6 @@ public abstract class AIStateMachine : MonoBehaviour
 			return point;
 		}
 	}
-
 	public float sensorRadius
 	{
 		get
@@ -113,9 +110,9 @@ public abstract class AIStateMachine : MonoBehaviour
 			return Mathf.Max(radius,_sensorTrigger.radius * _sensorTrigger.transform.lossyScale.z);
 		}
 	}
-
 	public bool useRootPosition{get{ return _rootPositionRefCount > 0;} }
 	public bool useRootRotation{get{ return _rootRotationRefCount > 0;} }
+
 
 	protected virtual void Awake()
 	{

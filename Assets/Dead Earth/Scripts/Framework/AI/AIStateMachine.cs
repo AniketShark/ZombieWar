@@ -39,11 +39,11 @@ public struct AITarget
 
 	public AITargetType type { get { return _type; } }
 	public Collider collider { get { return _collider; } }
-	public Vector3 position { get { return position; } }
+	public Vector3 position { get { return _position; } }
 	public float distance { get { return _distance; } set{ _distance = value;} }
 	public float time { get { return _time; } }
-
-
+	public int targetColliderID { get{ return _collider.GetInstanceID();} }
+	
 	public void Set(AITargetType t, Collider c, Vector3 p, float d)
 	{
 		_type = t;
@@ -72,12 +72,16 @@ public abstract class AIStateMachine : MonoBehaviour
 	protected AITarget _target          = new AITarget();
 	protected int _rootPositionRefCount = 0;
 	protected int _rootRotationRefCount = 0;
+	protected bool _isTargetReached     = false;
 
-	[SerializeField] protected AIState _currentState = null;
+	protected AIState _currentState = null;
 	[SerializeField] protected AIStateType _currentStateType = AIStateType.Idle;
 	[SerializeField] protected SphereCollider  _targetTrigger = null;
 	[SerializeField] protected SphereCollider _sensorTrigger  = null;
 	[SerializeField] [Range(0,15)]  protected float _stoppingDistance = 1.0f;
+	[SerializeField] protected int _currentWaypoint = -1;
+	[SerializeField] protected bool _randomPatrol = false;
+	[SerializeField] protected AIWaypointNetwork _waypointNetwork = null;
 
 	protected Animator _animator = null;
 	protected NavMeshAgent _navAgent = null;
@@ -90,7 +94,10 @@ public abstract class AIStateMachine : MonoBehaviour
 	{
 		get
 		{
-			if (_sensorTrigger != null) return Vector3.zero;
+			if (_sensorTrigger == null)
+			{
+				return Vector3.zero;
+			}
 
 			Vector3 point = _sensorTrigger.transform.position;
 			point.x += _sensorTrigger.center.x * _sensorTrigger.transform.lossyScale.x;
@@ -112,7 +119,11 @@ public abstract class AIStateMachine : MonoBehaviour
 	}
 	public bool useRootPosition{get{ return _rootPositionRefCount > 0;} }
 	public bool useRootRotation{get{ return _rootRotationRefCount > 0;} }
-
+	public AITargetType targetType{get{ return _target.type;} }
+	public Vector3 targetPosition{ get{ return _target.position;} }
+	public int targetColliderID{ get{ return _target.targetColliderID;} }
+	public bool isTargetReached{ get{ return _isTargetReached;} }
+	public bool inMeleeRange{ get;set;}
 
 	protected virtual void Awake()
 	{
@@ -120,7 +131,6 @@ public abstract class AIStateMachine : MonoBehaviour
 		_navAgent = GetComponent<NavMeshAgent>();
 		_collider = GetComponent<Collider>();
 		_transform = GetComponent<Transform>();
-
 
 		if(GameSceneManager.instance != null)
 		{
@@ -136,7 +146,10 @@ public abstract class AIStateMachine : MonoBehaviour
 		{
 			AISensor sensor = _sensorTrigger.GetComponent<AISensor>();
 			if(sensor != null)
+			{
+				//Debug.Log("Setting Sensor Trigger");
 				sensor.parentStateMachine = this;
+			}
 		}
 
 		AIState[] states = GetComponents<AIState>();
@@ -205,7 +218,7 @@ public abstract class AIStateMachine : MonoBehaviour
 			_targetTrigger.transform.position = t.position;
 			_targetTrigger.enabled = true;
 		}
-	}
+	} 
 
 	public void ClearTarget()
 	{
@@ -226,6 +239,7 @@ public abstract class AIStateMachine : MonoBehaviour
 		{
 			_target.distance = Vector3.Distance(_transform.position,_target.position);
 		}
+		_isTargetReached = false;
 	}
 
 	protected virtual void Update()
@@ -259,13 +273,23 @@ public abstract class AIStateMachine : MonoBehaviour
 	{
 		if(_targetTrigger == null || other != _targetTrigger) return;
 
+		_isTargetReached = true;
 		if(_currentState != null)
-			_currentState.OnDestinationReached(true); 
+			_currentState.OnDestinationReached(true);  
+	}
+
+	protected virtual void OnTriggerStay(Collider other)
+	{
+		if(_targetTrigger == null || other != _targetTrigger) return;
+
+		_isTargetReached = true;
 	}
 
 	protected virtual void OnTriggerExit(Collider other)
 	{
 		if(_targetTrigger == null || other != _targetTrigger) return;
+
+		_isTargetReached = false;
 
 		if(_currentState != null)
 			_currentState.OnDestinationReached(false); 
@@ -274,7 +298,9 @@ public abstract class AIStateMachine : MonoBehaviour
 	public virtual void OnTriggerEvent(AITriggerEventType type, Collider other)
 	{
 		if(_currentState != null)
+		{ 
 			_currentState.OnTriggerEvent(type,other);
+		}
 	}
 
 	protected virtual void OnAnimatorMove()
@@ -302,5 +328,51 @@ public abstract class AIStateMachine : MonoBehaviour
 	{
 		_rootPositionRefCount += rootPosition;
 		_rootRotationRefCount += rootRotation;
+	}
+
+	public Vector3 GetWaypointPosition(bool setNext)
+	{
+		if(_currentWaypoint == -1)
+		{
+			if(_randomPatrol)
+				_currentWaypoint = Random.Range(0,_waypointNetwork.Waypoints.Count);
+			else
+				_currentWaypoint = 0;
+		}
+		else
+			if(setNext)
+				NextWayPoint();
+
+		Transform newWayPoint = null;
+		if (_waypointNetwork.Waypoints[_currentWaypoint] != null)
+		{
+			newWayPoint = _waypointNetwork.Waypoints[_currentWaypoint];
+			//Debug.LogFormat("[AIStateMachine] Waypoint Name  : {0}", newWayPoint.name);
+
+			SetTarget(AITargetType.Waypoint,
+					  null,
+					  newWayPoint.position,
+					  Vector3.Distance(newWayPoint.position, transform.position));
+		}
+
+		if(newWayPoint)
+			return newWayPoint.position;
+
+		return Vector3.zero;
+	}
+
+	private void NextWayPoint()
+	{
+		if (_randomPatrol && _waypointNetwork.Waypoints.Count > 1)
+		{
+			int old = _currentWaypoint;
+			while (_currentWaypoint == old)
+			{
+				_currentWaypoint = Random.Range(0, _waypointNetwork.Waypoints.Count);
+				Debug.LogFormat("[AIZombieState_Patrol1] Calling old {0} _currentWaypoint {1}", old, _currentWaypoint);
+			}
+		}
+		else
+			_currentWaypoint = _currentWaypoint == _waypointNetwork.Waypoints.Count - 1 ? 0 : _currentWaypoint + 1;
 	}
 }

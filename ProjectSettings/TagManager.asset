@@ -4,9 +4,10 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - AI Sound Emmiter
   - AI Visual
   - AI Food
+  - Flash Light
+  - AI Sound Emitter
   layers:
   - Default
   - TransparentFX

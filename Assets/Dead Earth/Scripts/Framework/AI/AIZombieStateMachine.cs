@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,19 +9,23 @@ using UnityEngine;
 /// </summary>
 public class AIZombieStateMachine : AIStateMachine
 {
+
 	//Inspector Assigned
-   [SerializeField] [Range(10.0f,360.0f)]float _fov = 50.0f;
+	[SerializeField] [Range(10.0f,360.0f)]float _fov = 50.0f;
    [SerializeField] [Range(0.0f,1.0f)]   float _sight = 0.5f;
    [SerializeField] [Range(0.0f,1.0f)]   float _hearing = 0.5f;
    [SerializeField] [Range(0.0f,1.0f)]   float _aggression = 0.5f;
    [SerializeField] [Range(0,100)]   int _health = 100;
    [SerializeField] [Range(0.0f,1.0f)]   float _intelligence = 0.5f;
    [SerializeField] [Range(0.0f,1.0f)]   float _satisfaction = 1.0f;
+	[SerializeField] float _replenishRate     = 0.5f;
+	[SerializeField] float _depletionRate  = 0.5f;
 
 	private int _seeking = 0;
 	private bool _feeding = false;
 	private bool _crawling = false;
 	private int _attackType = 0;
+	private float _speed = 0;
 
 	//Hashes
 	private int _speedHash = Animator.StringToHash("Speed");
@@ -42,12 +47,21 @@ public class AIZombieStateMachine : AIStateMachine
 	public int seeking {get{ return _seeking;} set{_seeking = value; } }
 	public float speed
 	{
-		get
-		{
-			return _navAgent != null ? _navAgent.speed : 0.0f;
-		}
-		set { if (_navAgent != null) _navAgent.speed = value; }
+		get	{ return _speed; }
+		set { _speed = value; }
 	}
+
+	public float replenishRate
+	{
+		get	{ return _replenishRate; }
+	}
+
+	public float depletionRate
+	{
+		get	{ return _depletionRate; }
+	}
+
+
 
 	protected override void Update()
 	{
@@ -55,12 +69,13 @@ public class AIZombieStateMachine : AIStateMachine
 
 		 if(_animator != null)
 		{
-			_animator.SetFloat(_speedHash,_navAgent.speed);
+			_animator.SetFloat(_speedHash,_speed);
 			_animator.SetBool(_feedingHash,_feeding);
 			_animator.SetInteger(_seekingHash,_seeking);
 			_animator.SetInteger(_attackHash,_attackType);
 		}
 	}
 
+	
 }
  

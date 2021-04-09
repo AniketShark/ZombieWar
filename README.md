@@ -1,2 +1,2 @@
-# FPS
-First person shooter game.
+# ZombieWar
+Single Player Survival FPS game.
